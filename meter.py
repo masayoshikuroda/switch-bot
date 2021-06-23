@@ -8,7 +8,7 @@ devices = sb.get_devices()
 
 dict = {}
 for device in devices:
-    if (device['deviceType'] == 'Meter'):
+    if (('deviceType' in device) and (device['deviceType'] == 'Meter')):
         id = device['deviceId']
         status = sb.get_status(id)
         dict[id] = status
