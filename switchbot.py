@@ -46,18 +46,18 @@ class SwitchBot:
         return dict['body']
 
     def send_command(self, id, command, param, type):
-        url = self.get_url('devices', id, command)
-        data = { 'command': args.action, 'parameter': args.param, 'commandType': args.type }
-        data = urlencode(data)
+        url = self.get_url('devices', id, 'commands')
+        data = { 'command': command, 'parameter': param, 'commandType': type }
+        data = json.dumps(data)
         data = data.encode('ascii')
-        headers = {'Content-Type' : 'application/json'}
+        headers = {'Content-Type' : 'application/json; charset: utf8' }
         body = self.do_get(url, data, headers)
         dict = json.loads(body)
         return dict
 
 if __name__ == '__main__':
     argparser = ArgumentParser(description='SwitchBot device control.')
-    argparser.add_argument('command', type=str, help='get_devices|get_status|post_action')
+    argparser.add_argument('command', type=str, help='get_devices|get_status|send_command')
     argparser.add_argument('-d', '--dev_id',    type=str, dest='dev_id',  default='dev_id',  help='device id for reading status')
     argparser.add_argument('-a', '--action',    type=str, dest='action',  default='turnOn',  help='command to send device')
     argparser.add_argument('-p', '--parameter', type=str, dest='param',   default='default', help='parameter of command')

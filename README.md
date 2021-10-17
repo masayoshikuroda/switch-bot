@@ -46,8 +46,16 @@ get_statusコマンドを利用して、温湿度計のステータスを取得�
 
 ### 赤外線デバイスの制御
 
-TBD
+$ python3 switchbot.py send_command --dev_id id [--action action] [--parameter param] [--type type]
 
+`引数`
+- dev_id: コマンドを送信するデバイスのID
+- action: 送信するコマンド文字列(デフォルト 'turnOn')
+- paramter: コマンドに付随するパラメータ(デフォルト 'default')
+- type: コマンド種類(デフォルト 'command')
+
+`戻り値`
+JSON形式
 
 ### 複数の温湿度計からの値を取得
 
