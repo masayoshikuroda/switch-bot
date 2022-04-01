@@ -44,6 +44,13 @@ JSON形式
 デバイス一覧を取得した時に、deviceTypeが "Meter"のデバイスが温湿度計。
 get_statusコマンドを利用して、温湿度計のステータスを取得する。
 
+### 電力計からの値を取得
+
+デバイス一覧を取得した時に、deviceTypeが"deviceType": "Plug Mini (JP)"デバイスが電力計。
+get_statusコマンドを利用して、温湿度計のステータスを取得する。
+- voltage: 電圧瞬時値 単位 [V]
+- electricCurrent: 電流瞬時値、単位 [A]
+
 ### 赤外線デバイスの制御
 
 $ python3 switchbot.py send_command --dev_id id [--action action] [--parameter param] [--type type]
