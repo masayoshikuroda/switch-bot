@@ -71,4 +71,22 @@ $ python3 meter.py
 `戻り値`
 JSON形式
 
+## Bluetoothを利用
+
+BLE Advertisementから計測値を取得する。
+Bleakライブラリが必要
+
+### 温湿度計から温度を取得
+
+$ python3 meter_ble.py
+
+`戻り値`
+JSON形式
+
+### プラグミニから電力を取得
+
+$ pythoh3 plug_ble.py
+
+`戻り値`
+JSON形式
 
