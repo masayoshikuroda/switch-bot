@@ -1,51 +1,63 @@
 import sys
+from argparse import ArgumentParser
 from datetime import datetime
 import json
 import asyncio
 from bleak import BleakScanner
 
 plugs = {}
+debug = False
 
 def detection_callback(device, advertisement_data):
     md = advertisement_data.manufacturer_data
     if 2409 in md: 
         data = md[2409]
 #        print('data:', data, end=' ')
-        mac = '{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}'.format(data[0], data[1], data[2], data[3], data[4], data[5])
-        seq = int.from_bytes(data[6:7], byteorder='little')
+        deviceId = data[0:6].hex().upper()
+        seq = data[6]
         status = 'on' if int.from_bytes(data[7:8], byteorder='little')==0x80 else 'off'
-        dts = int.from_bytes(data[8:9], byteorder='little')
-        delay = dts & 0x01
-        timer = dts & 0x02
-        sync_utc = dts & 0x04
-        rssi = int.from_bytes(data[9:10], byteorder='little')
-        power = int.from_bytes(data[10:12], byteorder='little')
-      
-#        now = datetime.now() 
-#        print(now.strftime('%Y/%m/%d %H:%M:%S') + "," + str(power))
+        dts = data[8]
+        delay = True if dts & 0x01 > 0 else False
+        timer = True if dts & 0x02 > 0 else False
+        sync_utc = True if dts & 0x04 > 0 else False
+        rssi = data[9]
+        overload = True if data[10] & 0xE0 > 0 else False
+        power = int.from_bytes(data[10:12], byteorder='big') & 0x7FFF
 
-        plug = {} 
-        plug['mac'] = mac
+        plug = {}
+        plug['datetime'] = datetime.now().strftime('%Y/%m/%d %H:%M:%S.%f')
+        plug['deviceId'] = deviceId
         plug['seq'] = seq
         plug['status'] = status
         plug['delay'] = delay
         plug['timer'] = timer
         plug['sync_utc'] = sync_utc
         plug['rssi'] = rssi
+        plug['overload'] = overload
         plug['power'] = power
-        plugs[mac] = plug
+        plugs[deviceId] = plug
 
-async def main():
+        if debug:
+            print(json.dumps(plug))
+
+async def main(sleep_time):
     scanner = BleakScanner()
 #    print('scanner: created')
     scanner.register_detection_callback(detection_callback)
 #    print('scanner: registered')
     await scanner.start()
 #    print('scanner: started')
-    await asyncio.sleep(1)
+    await asyncio.sleep(sleep_time)
 #    print('wait end')
     await scanner.stop()
 #    print('scanner: stopped')
     print(json.dumps(plugs))
 
-asyncio.run(main())
+if __name__ == '__main__':
+    argparser = ArgumentParser(description='SwitchBot Plug mini.')
+    argparser.add_argument('-w', '--wait',    type=int, dest='wait_time',  default='1',  help='advertisement wait time[sec]')
+    argparser.add_argument('-d', '--debug',   action='store_true',  help='Debug output')
+    args = argparser.parse_args()
+    debug = args.debug
+
+    asyncio.run(main(args.wait_time))
