@@ -5,14 +5,25 @@ import json
 import asyncio
 from bleak import BleakScanner
 
+CHAR_UUID = '0000fd3d-0000-1000-8000-00805f9b34fb'
+
 plugs = {}
 debug = False
 
 def detection_callback(device, advertisement_data):
-    md = advertisement_data.manufacturer_data
+    sd = advertisement_data.service_data
+#    print(sd)
+    if CHAR_UUID not in sd:
+        return
+
+    model = sd[CHAR_UUID]
+#    print(model)
+    if model != b'j\x00d':
+        return
+    
+    md = advertisement_data.manufacturer_data 
     if 2409 in md: 
         data = md[2409]
-#        print('data:', data, end=' ')
         deviceId = data[0:6].hex().upper()
         seq = data[6]
         status = 'on' if int.from_bytes(data[7:8], byteorder='little')==0x80 else 'off'
