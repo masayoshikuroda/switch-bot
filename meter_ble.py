@@ -56,7 +56,7 @@ async def main():
 #    print('scanner: registered')
     await scanner.start()
 #    print('scanner: started')
-    await asyncio.sleep(5.0)
+    await asyncio.sleep(20.0)
 #    print('wait end')
     await scanner.stop()
 #    print('scanner: stopped')
