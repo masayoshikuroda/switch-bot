@@ -18,7 +18,7 @@ def detection_callback(device, advertisement_data):
 
     model = sd[CHAR_UUID]
 #    print(model)
-    if model != b'j\x00d':
+    if model != b'g\x00d':
         return
     
     md = advertisement_data.manufacturer_data 
