@@ -12,16 +12,17 @@ debug = False
 
 def detection_callback(device, advertisement_data):
     sd = advertisement_data.service_data
-#    print(sd)
+    #print('sd: ', sd)
     if CHAR_UUID not in sd:
         return
 
     model = sd[CHAR_UUID]
-#    print(model)
-    if model != b'j\x00d':
+    #print('model: ', model)
+    if model != b'g\x00d':
         return
     
-    md = advertisement_data.manufacturer_data 
+    md = advertisement_data.manufacturer_data
+    #print('md: ', md)
     if 2409 in md: 
         data = md[2409]
         deviceId = data[0:6].hex().upper()
