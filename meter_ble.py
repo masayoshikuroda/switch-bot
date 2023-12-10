@@ -18,7 +18,7 @@ def detection_callback(device, advertisement_data):
     if not type.startswith('SwitchBot Meter'):
         return
     
-    deviceId = md[0:6].hex(':').upper()
+    deviceId = md[0:6].hex().upper()
     deviceType = 'Meter'
     temp = (md[9] & 0x7f) + (md[8] & 0x0f)/10
     humi = (md[10] & 0x7f)

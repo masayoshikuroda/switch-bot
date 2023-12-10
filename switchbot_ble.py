@@ -17,7 +17,7 @@ device_types = {
     0x6D : 'SwitchBot Hub Mini (HubMini)/Normal Mode',
     0x64 : 'Unknown d',
     0x67 : 'SwitchBot Plug Mini',
-    0x6A : 'Unknwon j',
+    0x6A : 'SwitchBot Plug Mini(JP)',
     0x6D : 'Unknown m',
     0x76 : 'Unknwon v',
     0x77 : 'SwitchBot MeterOutdoor(WoIOSensor)/w',

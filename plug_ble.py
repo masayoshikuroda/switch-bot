@@ -15,8 +15,6 @@ def detection_callback(device, advertisement_data):
     if SERV_UUID not in advertisement_data.service_data:
         return
 
-    print_ble_info(device, advertisement_data)
-
     sd = advertisement_data.service_data.get(SERV_UUID)
     type = device_types[sd[0]]
     if not type.startswith('SwitchBot Plug Mini'):
