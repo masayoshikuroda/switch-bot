@@ -4,21 +4,22 @@ from datetime import datetime
 import json
 import asyncio
 from bleak import BleakScanner
-
-CHAR_UUID = '0000fd3d-0000-1000-8000-00805f9b34fb'
+from switchbot_ble import SERV_UUID
+from switchbot_ble import device_types 
+from switchbot_ble import print_ble_info
 
 plugs = {}
 debug = False
 
 def detection_callback(device, advertisement_data):
-    sd = advertisement_data.service_data
-    #print('sd: ', sd)
-    if CHAR_UUID not in sd:
+    if SERV_UUID not in advertisement_data.service_data:
         return
 
-    model = sd[CHAR_UUID]
-    #print('model: ', model)
-    if model != b'g\x00d':
+    print_ble_info(device, advertisement_data)
+
+    sd = advertisement_data.service_data.get(SERV_UUID)
+    type = device_types[sd[0]]
+    if not type.startswith('SwitchBot Plug Mini'):
         return
     
     md = advertisement_data.manufacturer_data
