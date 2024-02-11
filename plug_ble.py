@@ -1,4 +1,5 @@
 import sys
+import logging
 from argparse import ArgumentParser
 from datetime import datetime
 import json
@@ -8,8 +9,10 @@ from switchbot_ble import SERV_UUID
 from switchbot_ble import device_types 
 from switchbot_ble import print_ble_info
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler(sys.stdout))
+
 plugs = {}
-debug = False
 
 def detection_callback(device, advertisement_data):
     if SERV_UUID not in advertisement_data.service_data:
@@ -21,7 +24,8 @@ def detection_callback(device, advertisement_data):
         return
     
     md = advertisement_data.manufacturer_data
-    #print('md: ', md)
+    logger.debug('manufacturer_data: ', md)
+
     if 2409 in md: 
         data = md[2409]
         deviceId = data[0:6].hex().upper()
@@ -48,20 +52,19 @@ def detection_callback(device, advertisement_data):
         plug['power'] = power
         plugs[deviceId] = plug
 
-        if debug:
-            print(json.dumps(plug))
+        logger.debug(json.dumps(plug))
 
 async def main(sleep_time):
     scanner = BleakScanner()
-#    print('scanner: created')
+    logger.debug('scanner: created')
     scanner.register_detection_callback(detection_callback)
-#    print('scanner: registered')
+    logger.debug('scanner: registered')
     await scanner.start()
-#    print('scanner: started')
+    logger.debug('scanner: started')
     await asyncio.sleep(sleep_time)
-#    print('wait end')
+    logger.debug('scanner: slept')
     await scanner.stop()
-#    print('scanner: stopped')
+    logger.debug('scanner: stopped')
     print(json.dumps(plugs))
 
 if __name__ == '__main__':
@@ -69,6 +72,7 @@ if __name__ == '__main__':
     argparser.add_argument('-w', '--wait',    type=int, dest='wait_time',  default='1',  help='advertisement wait time[sec]')
     argparser.add_argument('-d', '--debug',   action='store_true',  help='Debug output')
     args = argparser.parse_args()
-    debug = args.debug
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
 
     asyncio.run(main(args.wait_time))
