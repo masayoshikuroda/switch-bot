@@ -3,35 +3,58 @@
 
 import sys
 import os
+import time
 import json
-from urllib.parse import urlencode
-from urllib.request import urlopen, Request, URLError, HTTPError
+import uuid
+import base64
+import hashlib
+import hmac
+import requests
 from argparse import ArgumentParser
 
 class SwitchBot:
     BASE_URL        = 'https://api.switch-bot.com'
     BASE_PATH       = os.path.dirname(os.path.abspath(__file__))
     TOKEN_FILE      = os.path.join(BASE_PATH, 'token.txt')
+    SECRET_FILE     = os.path.join(BASE_PATH, 'secret.txt')
     DEVICES_FILE    = os.path.join(BASE_PATH, 'devices.json')
 
     def __init__(self):
         with open(SwitchBot.TOKEN_FILE, 'r') as f:
             self.token = f.read().strip()
+        with open(SwitchBot.SECRET_FILE, 'r') as f:
+            self.secret = f.read().strip()
 
     def get_headers(self):
-        return { 'Authorization': self.token }
+        sign, t, nonce = self.sign(self.token, self.secret)
 
+        headers = {}
+        headers['Authorization'] = self.token
+        headers['Content-Type'] = 'application/json'
+        headers['charset'] = 'utf8'
+        headers['t'] = str(t)
+        headers['sign'] = str(sign, 'utf-8')
+        headers['nonce'] = nonce
+        return headers
+
+    def sign(self, token, secret):
+        key = bytes(secret, "utf-8")
+        t = int(round(time.time() * 1000))
+        nonce = str(uuid.uuid4())
+        string_to_sign = "{}{}{}".format(token, t, nonce)
+        msg = bytes(string_to_sign, "utf-8")
+        sign = base64.b64encode( hmac.new(key, msg=msg, digestmod=hashlib.sha256).digest() )
+        return sign, t, nonce
+	
     def get_url(self, *pathes):
-        url = SwitchBot.BASE_URL + '/v1.0'
+        url = SwitchBot.BASE_URL + '/v1.1'
         for path in pathes:
             url += '/' + path
         return url
 
-    def do_get(self, url, data, headers={}):
-        req = Request(url, data, headers)
-        req.add_header('Authorization', self.token)
-        res = urlopen(req)
-        return res.read().decode()
+    def do_get(self, url, data):
+        response = requests.get(url=url, data=data, headers=self.get_headers())
+        return response.text
 
     def get_devices(self):
         url = self.get_url('devices')
