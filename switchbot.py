@@ -30,7 +30,6 @@ class SwitchBot:
 
         headers = {}
         headers['Authorization'] = self.token
-        headers['Content-Type'] = 'application/json'
         headers['charset'] = 'utf8'
         headers['t'] = str(t)
         headers['sign'] = str(sign, 'utf-8')
@@ -52,19 +51,32 @@ class SwitchBot:
             url += '/' + path
         return url
 
-    def do_get(self, url, data):
-        response = requests.get(url=url, data=data, headers=self.get_headers())
+    def do_get(self, url):
+        headers = self.get_headers()
+        response = requests.get(url=url, headers=headers)
         return response.text
-
+    
+    def do_post(self, url, data):
+        headers = self.get_headers()
+        headers['Content-Type'] = 'application/json'
+        response = requests.post(url=url, data=data, headers=headers)
+        return response.text
+    
     def get_devices(self):
         url = self.get_url('devices')
-        body = self.do_get(url, None)
+        body = self.do_get(url)
         dict = json.loads(body)
         return dict['body']['deviceList']
-       
+      
+    def get_infrared_devices(self):
+        url = self.get_url('devices')
+        body = self.do_get(url)
+        dict = json.loads(body)
+        return dict['body']['infraredRemoteList']
+ 
     def get_status(self, id):
         url = self.get_url('devices', id, 'status')
-        body = self.do_get(url, None)
+        body = self.do_get(url)
         dict = json.loads(body)
         return dict['body']
 
@@ -73,14 +85,13 @@ class SwitchBot:
         data = { 'command': command, 'parameter': param, 'commandType': type }
         data = json.dumps(data)
         data = data.encode('ascii')
-        headers = {'Content-Type' : 'application/json; charset: utf8' }
-        body = self.do_get(url, data, headers)
+        body = self.do_post(url, data)
         dict = json.loads(body)
         return dict
 
 if __name__ == '__main__':
     argparser = ArgumentParser(description='SwitchBot device control.')
-    argparser.add_argument('command', type=str, help='get_devices|get_status|send_command')
+    argparser.add_argument('command', type=str, help='get_devices|get_infrared_devices|get_status|send_command')
     argparser.add_argument('-d', '--dev_id',    type=str, dest='dev_id',  default='dev_id',  help='device id for reading status')
     argparser.add_argument('-a', '--action',    type=str, dest='action',  default='turnOn',  help='command to send device')
     argparser.add_argument('-p', '--parameter', type=str, dest='param',   default='default', help='parameter of command')
@@ -90,6 +101,8 @@ if __name__ == '__main__':
     sb = SwitchBot()
     if args.command.startswith('get_dev'):
         dict = sb.get_devices()
+    elif args.command.startswith('get_infra'):
+        dict = sb.get_infrared_devices()
     elif args.command.startswith('get_sta'):
         dict = sb.get_status(args.dev_id)
     elif args.command.startswith('send_com'):
