@@ -27,6 +27,20 @@ JOSN形式
 statuscodeが100であることを確認する。
 ステータスを取得するデバイスIDを deviceIdの値から確認する。
 
+### 赤外線デバイス一覧
+
+$ python3 switchbot.py get_infrared_devices
+
+`引数`
+なし
+
+`戻り値`
+JOSN形式
+
+フォーマットした方がわかりやすい。 例) ... | jq .
+statuscodeが100であることを確認する。
+ステータスを取得するデバイスIDを deviceIdの値から確認する。
+
 ### デバイスステータスの取得
 
 $ python3 switchbot.py get_status --dev_id id
